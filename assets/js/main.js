@@ -11,14 +11,14 @@
     if (!nav || !toggle) return;
     nav.classList.remove("is-open");
     toggle.setAttribute("aria-expanded", "false");
-    toggle.setAttribute("aria-label", "Open menu");
+    toggle.setAttribute("aria-label", "باز کردن منو");
   }
 
   if (toggle && nav) {
     toggle.addEventListener("click", function () {
       var open = nav.classList.toggle("is-open");
       toggle.setAttribute("aria-expanded", open ? "true" : "false");
-      toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+      toggle.setAttribute("aria-label", open ? "بستن منو" : "باز کردن منو");
     });
 
     nav.addEventListener("click", function (event) {
@@ -72,15 +72,14 @@
     form.addEventListener("submit", function (event) {
       event.preventDefault();
       var selects = Array.prototype.slice.call(form.querySelectorAll("select"));
+      // The first option of every select is the "no filter" choice (empty value).
       var chosen = selects
         .map(function (select) { return select.value; })
-        .filter(function (value, index) {
-          return index === 0 ? value !== "Any Location" : index === 1 ? value !== "Any Type" : value !== "Any Budget";
-        });
+        .filter(function (value) { return value !== ""; });
 
       note.textContent = chosen.length
-        ? "Showing homes: " + chosen.join(" · ")
-        : "Showing all available homes.";
+        ? "نمایش خانه‌ها: " + chosen.join(" · ")
+        : "نمایش همه خانه‌های موجود.";
       note.classList.add("is-visible");
 
       window.clearTimeout(note.hideTimer);
