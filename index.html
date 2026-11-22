@@ -63,81 +63,100 @@
 
 <main id="main">
   <!-- ============ HERO ============ -->
-  <section class="hero" id="top">
-    <div class="hero-bg" role="img" aria-label="ویلای مدرن با استخر بی‌نهایت در غروب آفتاب"></div>
-    <div class="container hero-inner">
-      <p class="eyebrow eyebrow-light">املاک لوکس. زندگی بهتر.</p>
-      <h1>
-        خانه رویایی خود را پیدا کنید<br />
-        <span class="script">با اورلایت</span>
-      </h1>
-      <p class="hero-copy">
-        خانه‌های مدرن، موقعیت‌های ممتاز و محله‌هایی متناسب با سبک زندگی شما
-        &mdash; همه در یک جا.
-      </p>
+  <!-- A tall scroll track: the stage inside stays pinned while
+       assets/js/hero-scroll.js scrubs the video with the scroll. -->
+  <section class="hero-scroll" id="top">
+    <div class="hero-stage">
+      <div class="hero-media" aria-hidden="true">
+        <div class="hero-fallback"></div>
+        <div class="hero-poster"></div>
+        <video class="hero-video" muted playsinline preload="auto" tabindex="-1"
+               poster="assets/video/hero-poster.jpg"
+               data-src-desktop="assets/video/hero-desktop.mp4"
+               data-src-mobile="assets/video/hero-mobile.mp4"></video>
+        <div class="hero-scrim"></div>
+      </div>
 
-      <form class="search-bar" id="searchForm">
-        <div class="search-field">
-          <span class="search-label">موقعیت</span>
-          <div class="search-control">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11Z" />
-              <circle cx="12" cy="10" r="2.4" />
-            </svg>
-            <select aria-label="موقعیت">
-              <option value="">همه شهرها</option>
-              <option>تهران</option>
-              <option>کرج</option>
-              <option>اصفهان</option>
-              <option>مشهد</option>
-              <option>شیراز</option>
-            </select>
+      <div class="container hero-inner">
+        <p class="eyebrow eyebrow-light">املاک لوکس. زندگی بهتر.</p>
+        <h1>
+          خانه رویایی خود را پیدا کنید<br />
+          <span class="script">با اورلایت</span>
+        </h1>
+        <p class="hero-copy">
+          خانه‌های مدرن، موقعیت‌های ممتاز و محله‌هایی متناسب با سبک زندگی شما
+          &mdash; همه در یک جا.
+        </p>
+
+        <form class="search-bar" id="searchForm">
+          <div class="search-field">
+            <span class="search-label">موقعیت</span>
+            <div class="search-control">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11Z" />
+                <circle cx="12" cy="10" r="2.4" />
+              </svg>
+              <select aria-label="موقعیت">
+                <option value="">همه شهرها</option>
+                <option>تهران</option>
+                <option>کرج</option>
+                <option>اصفهان</option>
+                <option>مشهد</option>
+                <option>شیراز</option>
+              </select>
+            </div>
           </div>
-        </div>
 
-        <div class="search-field">
-          <span class="search-label">نوع ملک</span>
-          <div class="search-control">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M3 10.5 12 4l9 6.5" />
-              <path d="M5.5 9.8V19h13V9.8" />
-              <path d="M10 19v-4.5h4V19" />
-            </svg>
-            <select aria-label="نوع ملک">
-              <option value="">همه انواع</option>
-              <option>ویلا</option>
-              <option>آپارتمان</option>
-              <option>پنت‌هاوس</option>
-            </select>
+          <div class="search-field">
+            <span class="search-label">نوع ملک</span>
+            <div class="search-control">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 10.5 12 4l9 6.5" />
+                <path d="M5.5 9.8V19h13V9.8" />
+                <path d="M10 19v-4.5h4V19" />
+              </svg>
+              <select aria-label="نوع ملک">
+                <option value="">همه انواع</option>
+                <option>ویلا</option>
+                <option>آپارتمان</option>
+                <option>پنت‌هاوس</option>
+              </select>
+            </div>
           </div>
-        </div>
 
-        <div class="search-field">
-          <span class="search-label">بودجه</span>
-          <div class="search-control">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M18.5 5.5S17 8 12 8 5.5 5.5 5.5 5.5" />
-              <path d="M12 8v13" />
-              <path d="M15.5 11.5c0-1.4-1.6-2.2-3.5-2.2s-3.5.8-3.5 2.4 1.7 2 3.5 2 3.5.6 3.5 2.2-1.6 2.3-3.5 2.3-3.5-.8-3.5-2.2" />
-            </svg>
-            <select aria-label="بودجه">
-              <option value="">هر بودجه‌ای</option>
-              <option>تا ۵ میلیارد تومان</option>
-              <option>۵ تا ۱۵ میلیارد تومان</option>
-              <option>بیش از ۱۵ میلیارد تومان</option>
-            </select>
+          <div class="search-field">
+            <span class="search-label">بودجه</span>
+            <div class="search-control">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M18.5 5.5S17 8 12 8 5.5 5.5 5.5 5.5" />
+                <path d="M12 8v13" />
+                <path d="M15.5 11.5c0-1.4-1.6-2.2-3.5-2.2s-3.5.8-3.5 2.4 1.7 2 3.5 2 3.5.6 3.5 2.2-1.6 2.3-3.5 2.3-3.5-.8-3.5-2.2" />
+              </svg>
+              <select aria-label="بودجه">
+                <option value="">هر بودجه‌ای</option>
+                <option>تا ۵ میلیارد تومان</option>
+                <option>۵ تا ۱۵ میلیارد تومان</option>
+                <option>بیش از ۱۵ میلیارد تومان</option>
+              </select>
+            </div>
           </div>
-        </div>
 
-        <button class="btn btn-search" type="submit">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="11" cy="11" r="6.5" />
-            <path d="m16 16 4 4" />
-          </svg>
-          جستجو
-        </button>
-        <p class="search-note" id="searchNote" role="status"></p>
-      </form>
+          <button class="btn btn-search" type="submit">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="6.5" />
+              <path d="m16 16 4 4" />
+            </svg>
+            جستجو
+          </button>
+          <p class="search-note" id="searchNote" role="status"></p>
+        </form>
+      </div>
+
+      <div class="hero-cue" aria-hidden="true">
+        <span class="hero-cue-loading">در حال آماده‌سازی صحنه…</span>
+        <span class="hero-cue-scroll">برای حرکت در صحنه اسکرول کنید</span>
+        <span class="hero-cue-line"></span>
+      </div>
     </div>
   </section>
 
@@ -532,5 +551,6 @@
 </footer>
 
 <script src="assets/js/main.js"></script>
+<script src="assets/js/hero-scroll.js"></script>
 </body>
 </html>

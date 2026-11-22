@@ -285,37 +285,95 @@ button { font: inherit; cursor: pointer; }
    HERO
    ============================================================ */
 
-.hero {
+/* The section is a tall scroll track; the stage inside is pinned with
+   position: sticky for the whole track, and hero-scroll.js maps the scroll
+   progress through the track to video.currentTime. Nothing autoplays. */
+.hero-scroll {
   position: relative;
-  isolation: isolate;
-  padding: 96px 0 128px;
-  color: #fff;
+  height: 320vh;
+  margin-top: -82px;           /* run under the sticky header, pin from 0 */
+  background: var(--navy-deep);
+}
+
+.hero-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;              /* no gap when the mobile URL bar collapses */
+  display: flex;
+  align-items: center;
+  padding-top: 82px;           /* clears the sticky header */
   overflow: hidden;
+  isolation: isolate;
+  color: #fff;
+  --hero-progress: 0;          /* 0 → 1, written by hero-scroll.js */
 }
 
-.hero-bg {
-  position: absolute;
-  inset: 0;
-  z-index: -2;
-  background-image: url("https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1920&q=75");
-  background-size: cover;
-  background-position: center 62%;
-}
-
-.hero::before {
-  content: "";
+/* media layers, painted bottom → top */
+.hero-media {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background:
-    linear-gradient(260deg, rgba(15, 26, 47, 0.86) 0%, rgba(17, 30, 54, 0.72) 42%, rgba(15, 26, 47, 0.34) 100%),
-    linear-gradient(180deg, rgba(15, 26, 47, 0.1) 0%, rgba(15, 26, 47, 0.55) 100%);
+  overflow: hidden;
+  background: var(--navy-deep);
 }
 
-.hero-inner { max-width: 860px; margin-left: auto; margin-right: auto; padding-left: 28px; padding-right: 28px; }
-.hero .eyebrow { color: var(--accent); letter-spacing: 0; }
+.hero-fallback,
+.hero-poster,
+.hero-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
 
-.hero h1 {
+/* the original hero photograph remains the failure fallback */
+.hero-fallback {
+  background: url("https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1920&q=75") center 62% / cover no-repeat;
+}
+
+/* first frame of the video: covers loading, never a black rectangle */
+.hero-poster {
+  background: url("../video/hero-poster.jpg") center 58% / cover no-repeat;
+  transition: opacity 0.7s ease;
+}
+
+.hero-video {
+  object-fit: cover;
+  object-position: center 58%;
+  opacity: 0;
+  transition: opacity 0.7s ease;
+}
+
+.hero-scroll.is-video-ready .hero-video { opacity: 1; }
+.hero-scroll.is-video-ready .hero-poster,
+.hero-scroll.is-video-failed .hero-poster { opacity: 0; }
+
+/* subtle scrim: keeps the copy legible without hiding the scene */
+.hero-scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(13, 23, 42, 0.52) 0%, rgba(13, 23, 42, 0.14) 30%, rgba(13, 23, 42, 0.18) 60%, rgba(13, 23, 42, 0.66) 100%),
+    radial-gradient(120% 95% at 76% 46%, rgba(13, 23, 42, 0.4) 0%, rgba(13, 23, 42, 0) 62%);
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 860px;
+  margin-inline: auto;
+  padding-inline: 28px;
+  will-change: opacity, transform;
+  /* the copy drifts away once the camera starts moving */
+  opacity: calc((0.3 - var(--hero-progress)) / 0.24);
+  transform: translate3d(0, calc(var(--hero-progress) * -26px), 0);
+}
+.hero-stage.is-past .hero-inner { pointer-events: none; }
+
+.hero-inner .eyebrow { color: var(--accent); letter-spacing: 0; }
+
+.hero-inner h1 {
   font-size: clamp(2.1rem, 4.6vw, 3.5rem);
   font-weight: 800;
   color: #fff;
@@ -323,7 +381,7 @@ button { font: inherit; cursor: pointer; }
   line-height: 1.45;
 }
 
-.hero h1 .script {
+.hero-inner h1 .script {
   display: inline-block;
   font-family: var(--script);
   font-weight: 400;
@@ -429,6 +487,60 @@ button { font: inherit; cursor: pointer; }
   transition: opacity 0.2s ease;
 }
 .search-note.is-visible { opacity: 1; }
+
+/* minimal loading / scroll cue — disappears once the scene starts moving */
+.hero-cue {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 28px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.82);
+  text-align: center;
+  pointer-events: none;
+  opacity: calc(1 - var(--hero-progress) * 5);
+}
+
+.hero-cue-scroll { display: none; }
+.hero-scroll.is-video-ready .hero-cue-loading { display: none; }
+.hero-scroll.is-video-ready .hero-cue-scroll { display: inline; }
+.hero-scroll.is-video-failed .hero-cue,
+.hero-scroll.is-static .hero-cue { display: none; }
+
+.hero-cue-line {
+  position: relative;
+  display: block;
+  width: 96px;
+  height: 2px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.22);
+}
+.hero-cue-line::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 38%;
+  border-radius: 2px;
+  background: var(--accent);
+  animation: heroCue 1.9s ease-in-out infinite;
+}
+@keyframes heroCue {
+  0% { transform: translateX(-110%); }
+  100% { transform: translateX(280%); }
+}
+
+/* reduced motion: one still frame, no pinned track, no scrubbing */
+.hero-scroll.is-static { height: auto; }
+.hero-scroll.is-static .hero-stage { position: relative; }
+.hero-scroll.is-static .hero-inner { opacity: 1; transform: none; }
 
 /* ============================================================
    FEATURES
@@ -873,7 +985,8 @@ button { font: inherit; cursor: pointer; }
 
   .header-actions .icon-btn { display: none; }
 
-  .hero { padding: 78px 0 104px; }
+  .hero-scroll { margin-top: -74px; }
+  .hero-stage { padding-top: 74px; }
 
   .search-bar {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -909,8 +1022,10 @@ button { font: inherit; cursor: pointer; }
 
   .header-actions .btn { display: none; }
 
-  .hero { padding: 62px 0 88px; }
-  .hero h1 { font-size: clamp(1.85rem, 7.4vw, 2.4rem); }
+  .hero-scroll { height: 300vh; }
+  .hero-stage { padding-top: 66px; }
+  .hero-cue { bottom: 18px; font-size: 0.72rem; }
+  .hero-inner h1 { font-size: clamp(1.85rem, 7.4vw, 2.4rem); }
   .hero-copy { font-size: 0.96rem; }
   .search-bar { margin-top: 34px; grid-template-columns: 1fr; }
   .search-field { padding: 10px 4px; border-bottom: 1px solid var(--line); }
