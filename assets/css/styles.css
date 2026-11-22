@@ -511,6 +511,8 @@ button { font: inherit; cursor: pointer; }
 .hero-scroll.is-video-ready .hero-cue-scroll { display: inline; }
 .hero-scroll.is-video-failed .hero-cue,
 .hero-scroll.is-static .hero-cue { display: none; }
+/* the cue only appears once the intro has handed over to the scroll */
+.hero-scroll.is-intro .hero-cue { opacity: 0; }
 
 .hero-cue-line {
   position: relative;

@@ -1,9 +1,12 @@
 /* ============================================================
    Everlight Homes — scroll-scrubbed hero video
    ------------------------------------------------------------
-   The hero video is NEVER played. Scroll progress through the
-   pinned hero track is mapped to video.currentTime, so the user
-   drives the camera by scrolling, in both directions.
+   The clip plays once, muted, as a short cinematic intro (the
+   exterior shot), then pauses for good. From that frame on, scroll
+   progress through the pinned hero track is mapped to
+   video.currentTime, so the user drives the camera by scrolling,
+   in both directions. The video never loops, and once the intro is
+   over it never plays again on its own.
 
    How the smoothness is achieved
    - The scroll listener only records the target progress. All
@@ -54,12 +57,18 @@
   var MIN_SEEK_STEP = 0.012; // seconds — ignore sub-frame differences
   var SEEK_TIMEOUT = 320;    // ms — release a seek gate that never resolved
   var READY_TIMEOUT = 8000;  // ms — begin scrubbing even on a slow network
+  var INTRO_MAX = 3;         // seconds of the clip that play on their own
+  var INTRO_RATIO = 0.35;    // …and never more than a third of the clip
 
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   var started = false;
   var staticMode = false;
   var failed = false;
   var ready = false;
+  var introActive = false;
+  var introTimer = 0;
+  var introStartY = 0;
+  var scrubOffset = 0;       // frame the scroll experience starts from
   var duration = 0;
   var progress = 0;
   var targetTime = 0;
@@ -153,10 +162,15 @@
     if (!rafId) rafId = window.requestAnimationFrame(tick);
   }
 
-  function onScroll() {
+  // `userScroll` is only true for a real scroll event: the bookkeeping calls
+  // (load, resize, orientation) must not interrupt the intro.
+  function onScroll(userScroll) {
     if (staticMode) return;
     progress = readProgress();
-    if (ready) targetTime = progress * duration;
+    if (introActive && userScroll && Math.abs(scrollY() - introStartY) > 2) {
+      stopIntro();
+    }
+    if (ready) targetTime = scrubOffset + progress * (duration - scrubOffset);
     requestTick();
   }
 
@@ -181,6 +195,53 @@
     } catch (error) { /* the next tick retries */ }
 
     section.classList.add("is-video-ready");
+    requestTick();
+    startIntro();
+  }
+
+  // ---- one-time intro -----------------------------------------------------
+  // The clip opens on the exterior. It plays once, muted, so the scene is
+  // alive from the first moment, then it pauses and the scroll takes over
+  // from exactly that frame — no rewind, no looping.
+  function startIntro() {
+    if (introActive || staticMode || failed || !ready) return;
+    if (progress > 0.02) return; // the visitor already scrolled: stay scroll-driven
+
+    introActive = true;
+    introStartY = scrollY();
+    scrubOffset = 0;
+    currentTime = 0;
+    lastSeeked = 0;
+    targetTime = 0;
+    section.classList.add("is-intro");
+
+    var played = video.play();
+    if (played && played.catch) {
+      played.catch(function () {
+        stopIntro(); // autoplay blocked: fall back to the paused first frame
+      });
+    }
+
+    introTimer = window.setTimeout(
+      stopIntro,
+      Math.min(INTRO_MAX, duration * INTRO_RATIO) * 1000
+    );
+  }
+
+  function stopIntro() {
+    if (!introActive) return;
+    introActive = false;
+    window.clearTimeout(introTimer);
+    section.classList.remove("is-intro");
+
+    try {
+      video.pause();
+    } catch (error) { /* ignore */ }
+
+    scrubOffset = Math.min(video.currentTime || 0, duration);
+    currentTime = scrubOffset;
+    lastSeeked = scrubOffset;
+    targetTime = scrubOffset + progress * (duration - scrubOffset);
     requestTick();
   }
 
@@ -232,11 +293,6 @@
     seekPending = false;
   });
 
-  // The scene must never run on its own.
-  video.addEventListener("play", function () {
-    video.pause();
-  });
-
   video.addEventListener("error", fail);
 
   // Safari buffers lazily until a user gesture: nudging the decoder on the
@@ -257,6 +313,7 @@
   window.addEventListener("wheel", prime, { passive: true });
 
   function enableStatic() {
+    stopIntro();
     staticMode = true;
     section.classList.add("is-static");
     if (rafId) {
@@ -286,7 +343,9 @@
   }
 
   measure();
-  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("scroll", function () {
+    onScroll(true);
+  }, { passive: true });
   window.addEventListener("resize", function () {
     measure();
     onScroll();
